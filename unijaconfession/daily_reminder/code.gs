@@ -49,13 +49,26 @@ const CONFIG = {
       schedule: [{ hour: 23, minute: 0 }],
       deletePrevious: false
     },
+
     iklanNiaga: {
       photoUrl: 'https://telegra.ph/file/6ed5935972e53a04190a2.png',
-      caption: 'Untuk hantar iklan niaga, sila gunakan butang di bawah', 
+      // We use <b></b> for bold instead of ** or *
+      caption: `<b>Untuk hantar dan lihat iklan niaga, sila gunakan butang "Iklan Niaga".</b>\n\nUrusan rumah sewa (iklan, mencari replacement), sila klik butang "@iklansewa_unisza".`,
+      extraButtonText: '🏘️ @iklansewa_unisza',
+      extraButtonUrl: 'https://t.me/iklansewa_unisza',
       isAdCategory: true,
       schedule: [{ hour: 10, minute: 0 }, { hour: 21, minute: 0 }],
       deletePrevious: true
     },
+    
+    //iklanNiaga: {
+    //  photoUrl: 'https://telegra.ph/file/6ed5935972e53a04190a2.png',
+    //  caption: 'Untuk hantar iklan niaga, sila gunakan butang di bawah', 
+    //  isAdCategory: true,
+    //  schedule: [{ hour: 10, minute: 0 }, { hour: 21, minute: 0 }],
+    //  deletePrevious: true
+   // },
+
     selawat: {
       photoUrl: 'https://telegra.ph/file/a140f873dd3a86d27f5ae.png',
       caption: '۞ اَللهُمَّ صَلِّ عَلَى سَيِّدِنَا مُحَمَّدٍ وَعَلَى آلِ سَيِّدِنَا مُحَمَّدٍ ۞\n\nJangan lupa selawat tau geng 😊',
@@ -111,12 +124,17 @@ function executeBroadcast(key) {
       });
 
       if (gRes.ok) {
-        saveId(`${key}_GROUP`, gRes.result.message_id);
-        const jumpLink = CONFIG.testMode 
-          ? `https://t.me/c/${CONFIG.cleanGroupId}/${gRes.result.message_id}?thread=${CONFIG.parentMessageId}`
-          : `https://t.me/${CONFIG.channelUsername}/${CONFIG.sopChannelMsgId}?comment=${gRes.result.message_id}`;
-          
-        inlineButton = [[{ text: 'klik sini untuk iklan', url: jumpLink }]];
+  saveId(`${key}_GROUP`, gRes.result.message_id);
+  const jumpLink = CONFIG.testMode 
+    ? `https://t.me/c/${CONFIG.cleanGroupId}/${gRes.result.message_id}?thread=${CONFIG.parentMessageId}`
+    : `https://t.me/${CONFIG.channelUsername}/${CONFIG.sopChannelMsgId}?comment=${gRes.result.message_id}`;
+    
+  
+  // --- UPDATED BUTTON LOGIC ---
+  inlineButton = [
+      [{ text: '📝 Iklan Niaga', url: jumpLink }], // Button 1
+      [{ text: item.extraButtonText, url: item.extraButtonUrl }] // Button 2
+  ];
       }
     }
 
@@ -130,7 +148,7 @@ function executeBroadcast(key) {
         chat_id: CONFIG.chatId,
         photo: item.photoUrl,
         caption: item.caption,
-        parse_mode: 'Markdown'
+        parse_mode: 'HTML' // <--- CHANGE THIS FROM 'Markdown' TO 'HTML'
       };
       if (inlineButton) payload.reply_markup = JSON.stringify({ inline_keyboard: inlineButton });
       cRes = callTelegram('sendPhoto', payload);
